@@ -43,5 +43,5 @@ jobs:
   workflows:
     default:
       jobs:
-        - Make Lint
+        - make-lint
         
