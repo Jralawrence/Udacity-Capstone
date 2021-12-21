@@ -5,7 +5,7 @@ jobs:
     docker:
       - image: python:3.7.3-stretch
 
-    working_directory: ~/repo
+  #  working_directory: ~/repo
 
     steps:
       - checkout
@@ -27,7 +27,7 @@ jobs:
           name: Installing hadolint & Pylint
           command: |  
             wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 && chmod +x /bin/hadolint
-            pip install pylint
+  #pip install pylint
       
       - run:
           name: run lint 
@@ -40,12 +40,6 @@ jobs:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
           
- 
- 
- 
- 
- 
- 
  
 workflows:
   default:
