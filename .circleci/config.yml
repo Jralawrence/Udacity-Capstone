@@ -24,10 +24,11 @@ jobs:
             make install
       
       - run:
-          name: Installing hadolint & Pylint
+          name: Installing hadolint, Pylint & Upgrading Pip
           command: |  
             wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 && chmod +x /bin/hadolint
             pip install pylint
+            pip install --upgrade pip
       
       - run:
           name: run lint 
