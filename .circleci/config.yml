@@ -89,5 +89,5 @@ workflows:
     jobs:
       - make-lint
       - docker-upload:
-        requires: [make-lint]
+          requires: [make-lint]
         
