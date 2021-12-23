@@ -55,34 +55,34 @@ jobs:
       - checkout
       
       - setup_remote_docker:
-        version: 19.03.13
+          version: 19.03.13
       
       - run:
-        name: containter version checkout
-        command: |
-          docker image ls
-          docker ps -a
+          name: containter version checkout
+          command: |
+            docker image ls
+            docker ps -a
         
       - run:
-        name: build docker containter
-        command: |
-          echo "--- Building Blue Deployment ---"
-          docker build -t jralawrence/udacity-capstone-blue-deployment
-          docker image ls
+          name: build docker containter
+          command: |
+            echo "--- Building Blue Deployment ---"
+            docker build -t jralawrence/udacity-capstone-blue-deployment
+            docker image ls
         
       - run:
-        name: testing docker container 
-        command: |
-            docker run -d --rm --name testapp -p 8081:8080 jralawrence/udacity-capstone-blue-deployment
-            sleep 5
-            docker container ls
-            docker stop testapp
+          name: testing docker container 
+          command: |
+              docker run -d --rm --name testapp -p 8081:8080 jralawrence/udacity-capstone-blue-deployment
+              sleep 5
+              docker container ls
+              docker stop testapp
       
       - run:
-        name: uploading docker container
-        command: |
-          docker login -u = "$DOCKERHUB_USERNAME" -p = "$DOCKERHUB_PASSWORD"
-          docker push jralawrence/udacity-capstone-blue-deployment
+          name: uploading docker container
+          command: |
+            docker login -u = "$DOCKERHUB_USERNAME" -p = "$DOCKERHUB_PASSWORD"
+            docker push jralawrence/udacity-capstone-blue-deployment
  
 workflows:
   default:
