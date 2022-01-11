@@ -38,7 +38,7 @@ jobs:
             . venv/bin/activate
             make lint
             
-  build-and-push-docker-image:
+  build-and-deploy-docker-image:
     machine: true
     working_directory: ~/capstone
     steps:
@@ -153,12 +153,12 @@ workflows:
   default:
     jobs:
       - build-environment
-      - build-and-push-docker-image:
+      - build-and-deploy-docker-image:
           requires: [build-environment]
       - create-cluster:
           cluster-name: eks-cluster-jacklawrence
       - deploy-app-eks:
-          requires: [build-and-push-docker-image]
+          requires: [build-and-deploy-docker-image]
           cluster-name: eks-cluster-jacklawrence
           aws-region: eu-central-1
           requires: [create-cluster]
