@@ -5,6 +5,16 @@ orbs:
   aws-eks: circleci/aws-eks@0.2.3
   kubernetes: circleci/kubernetes@0.12.0
 
+parameters:
+
+  ENV_NAME:
+    type: string
+    default: "capstone-project"
+  KEY_PAIR:
+    type: string
+    default: "capstone"
+
+
 jobs:
   make-lint:
     docker:
@@ -142,6 +152,6 @@ workflows:
       - docker-upload:
           requires: [make-lint]
       - infrastructure-creation:
-          cluster-name: jacks-capstone-project
+          cluster-name: capstone-project
           requires: [docker-upload]
         
