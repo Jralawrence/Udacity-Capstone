@@ -138,6 +138,97 @@ jobs:
           ssh-access: false
           ssh-public-key: ''
 
+  infrastructure-deletion:
+    executor: aws-eks/python3
+    parameters:
+      cluster-name:
+        description: EKS cluster name
+        type: string
+
+    steps:
+      - checkout
+      
+      - aws-eks/install-aws-iam-authenticator:
+          release-tag: ''
+      
+      - run:
+          name: eksctl tool installation
+          command: |
+            if which eksctl > /dev/null; then
+            echo "eksctl is already installed"
+            exit 0
+            fi
+            mkdir -p eksctl_download
+            curl --location --retry 5 "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C eksctl_download
+            chmod +x eksctl_download/eksctl
+            SUDO=""
+            if [ $(id -u) -ne 0 ] && which sudo > /dev/null ; then
+            SUDO="sudo"
+            fi
+            $SUDO mv eksctl_download/eksctl /usr/local/bin/
+            rmdir eksctl_download
+      
+      - aws-eks/delete-cluster:
+          cluster-name: << parameters.cluster-name >>   
+          
+  cluster-check:
+    executor: aws-eks/python3
+    parameters:
+      cluster-name:
+        description: EKS cluster name
+        type: string
+    
+    steps:
+      - kubernetes/install
+      
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+      
+      - run:
+          name: Kube cluster
+          command: |
+            kubectl get services
+            
+            
+  code-deployment:
+    executor: aws-eks/python3
+    parameters:
+      cluster-name:
+        description: EKS cluster name
+        type: string
+
+    steps:
+      - checkout
+      
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+          install-kubectl: true
+      
+      - kubernetes/create-or-update-resource:
+          get-rollout-status: true
+          resource-file-path: deployment.yml
+          resource-name: deployment/capstone-project-deployment            
+
+  deployment-test:
+    executor: aws-eks/python3
+    parameters:
+      cluster-name:
+        description: EKS cluster name
+        type: string
+    
+    steps:
+      - kubernetes/install
+      
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+      
+      - run:
+          name: Kube cluster
+          command: |
+            kubectl get svc
+            kubectl get nodes
+            kubectl get deployment
+            
 
 
 
@@ -154,4 +245,22 @@ workflows:
       - infrastructure-creation:
           cluster-name: capstone-project
           requires: [docker-upload]
-        
+      - check-cluster:
+          cluster-name: capstone-test2211-cluster
+      - delete-infrastructure:
+          cluster-name: capstone-test2211-cluster    
+          requires: [check-cluster]
+      - deploy-code:
+          cluster-name: capstone-project
+          requires: [check-cluster]
+      - test-deployment:
+          cluster-name: capstone-project
+          requires: [deploy-code]
+      - aws-eks/update-container-image:
+          cluster-name: capstone-project
+          container-image-updates: 'capstone-project-deployment=jacklawrencetui/capstone-project'
+          get-rollout-status: true
+          requires: [test-deployment]
+          resource-name: deployment/capstone-project-deployment                  
+      - aws-eks/delete-cluster:
+          cluster-name: capstone-project
